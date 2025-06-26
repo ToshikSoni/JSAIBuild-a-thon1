@@ -21,3 +21,8 @@ services:
                 posix:
                     shell: sh
                     run: npm run build
+
+environment:
+    name: vish-ai  # Added explicit environment name
+    subscription_id: 8ff006f0-42bb-47fe-a5bc-8930eb72c518
+    location: eastus2  # Add deployment location
