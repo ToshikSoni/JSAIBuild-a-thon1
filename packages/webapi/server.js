@@ -239,6 +239,45 @@ app.post("/clear-memory", (req, res) => {
     }
 });
 
+// Update CORS configuration to allow requests from your Static Web App domain
+app.use(cors({
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // List of allowed origins
+        const allowedOrigins = [
+            /\.azurestaticapps\.net$/,
+            /\.azurewebsites\.net$/,
+            /^http:\/\/localhost/,
+            /^http:\/\/127\.0\.0\.1/
+        ];
+        
+        let allowed = false;
+        // Check if origin matches any of our patterns
+        allowedOrigins.forEach(pattern => {
+            if (pattern.test(origin)) {
+                allowed = true;
+            }
+        });
+        
+        if (allowed) {
+            callback(null, true);
+        } else {
+            console.log(`Request from origin ${origin} not allowed by CORS policy, but permitting anyway`);
+            callback(null, true); // Allow all origins for now
+        }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With']
+}));
+
+// Add a health check endpoint
+app.get("/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Update the console log message
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

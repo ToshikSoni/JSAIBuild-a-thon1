@@ -176,10 +176,27 @@ export class ChatInterface extends LitElement {
         this._addWelcomeMessage();
         this.showCrisisResources = false;
         
-        // Clear the server-side memory as well
-        fetch("http://localhost:3001/clear-memory", {
+        let clearMemoryUrl;
+        
+        // Check if we're running in Azure or locally
+        if (window.location.hostname.includes('azurestaticapps.net') || 
+            window.location.hostname.includes('azurewebsites.net')) {
+            // Azure production environment
+            clearMemoryUrl = 'https://vishaiapi.azurewebsites.net/clear-memory';
+        } else {
+            // Local development
+            const host = window.location.hostname;
+            const port = 3001;
+            clearMemoryUrl = `http://${host}:${port}/clear-memory`;
+        }
+        
+        // Clear the server-side memory
+        fetch(clearMemoryUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Origin": window.location.origin
+            },
             body: JSON.stringify({ sessionId: this.sessionId }),
         }).catch(error => {
             console.error('Failed to clear server memory:', error);
@@ -247,22 +264,47 @@ export class ChatInterface extends LitElement {
     }
 
     async _apiCall(message) {
-        // Use window.location.hostname to make it work both locally and on other devices
-        const host = window.location.hostname;
-        const port = 3001;
-        const apiUrl = `http://${host}:${port}/chat`;
+        let apiUrl;
         
-        const res = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message,
-                useRAG: this.ragEnabled,
-                sessionId: this.sessionId
-            }),
-        });
-        const data = await res.json();
-        return data;
+        // Check if we're running in Azure or locally
+        if (window.location.hostname.includes('azurestaticapps.net') || 
+            window.location.hostname.includes('azurewebsites.net')) {
+            // Azure production environment
+            apiUrl = 'https://vishaiapi.azurewebsites.net/chat';
+            console.log('Using production API URL:', apiUrl);
+        } else {
+            // Local development or other environments
+            const host = window.location.hostname;
+            const port = 3001;
+            apiUrl = `http://${host}:${port}/chat`;
+            console.log('Using local API URL:', apiUrl);
+        }
+        
+        try {
+            const res = await fetch(apiUrl, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Origin": window.location.origin
+                },
+                body: JSON.stringify({
+                    message,
+                    useRAG: this.ragEnabled,
+                    sessionId: this.sessionId
+                }),
+            });
+            
+            if (!res.ok) {
+                console.error('API response not OK:', res.status, res.statusText);
+                throw new Error(`API returned status: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error('API call failed:', error);
+            throw error;
+        }
     }
 }
 
