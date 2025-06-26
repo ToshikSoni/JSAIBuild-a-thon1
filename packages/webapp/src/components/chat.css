@@ -125,7 +125,7 @@ body {
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 90vh; /* Use 90% of viewport height */
+    height: 73vh; /* Use 90% of viewport height */
     width: 100%;
     border-radius: var(--chat-border-radius);
     overflow: hidden;
