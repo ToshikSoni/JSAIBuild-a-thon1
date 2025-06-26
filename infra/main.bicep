@@ -1,4 +1,4 @@
-param webapiName string = 'aiChatHandlerSrvToshikServer'
+param webapiName string = 'VishAIapi'
 param appServicePlanName string = 'appserviceplan'
 targetScope = 'subscription'
 
