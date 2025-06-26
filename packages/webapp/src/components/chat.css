@@ -1,7 +1,7 @@
 :host {
     display: block;
     width: 100%;
-    height: 90vh;
+    height: 100vh;
     margin: 0 auto;
     /* Remove problematic positioning */
     position: static;
@@ -125,7 +125,7 @@ body {
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 73vh; /* Use 90% of viewport height */
+    height: 74vh; /* Further reduced to give more space to footer */
     width: 100%;
     border-radius: var(--chat-border-radius);
     overflow: hidden;
@@ -321,38 +321,30 @@ body {
 
 .chat-input {
     display: flex;
-    padding: 12px 16px; /* Reduced padding */
+    padding: 12px 16px;
     background-color: white;
     border-top: 1px solid #e0e0e0;
+    position: relative; /* Ensure proper stacking */
+    z-index: 10; /* Keep input above other elements */
+    min-height: 60px; /* Ensure minimum height for touch targets */
 }
 
 input {
     flex: 1;
-    padding: 12px 16px; /* Reduced padding */
+    padding: 12px 16px;
     border: 1px solid #ddd;
     border-radius: 30px;
-    font-size: 15px; /* Slightly smaller font */
+    font-size: 15px;
     outline: none;
     transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     font-family: 'Quicksand', sans-serif;
-}
-
-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(112, 179, 161, 0.15);
-    transform: translateY(-1px);
-}
-
-input::placeholder {
-    color: #aaa;
-    font-family: 'Quicksand', sans-serif;
-    font-weight: 400;
+    min-height: 24px; /* Ensure minimum height */
 }
 
 .send-button {
     margin-left: 10px;
-    padding: 0 25px;
+    padding: 0 20px; /* Slightly reduced horizontal padding */
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -365,6 +357,9 @@ input::placeholder {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 60px; /* Ensure minimum width */
+    height: 44px; /* Fixed height for better touch target */
+    justify-content: center; /* Center content */
 }
 
 .send-button::after {
@@ -383,27 +378,29 @@ button:disabled {
 }
 
 .chat-footer {
-    padding: 8px 16px; /* Reduced padding */
-    font-size: 0.8rem; /* Smaller font */
+    padding: 6px 8px; /* Increased padding */
+    font-size: 0.8rem; /* Slightly larger font */
     text-align: center;
     background-color: #f5f5f5;
-    color: #777;
+    color: #666; /* Slightly darker for better contrast */
     border-top: 1px solid #e0e0e0;
     font-family: 'Quicksand', sans-serif;
+    position: relative;
+    z-index: 50;
+    height: auto;
+    display: block;
+    overflow: visible;
+    min-height: 24px; /* Increased minimum height */
+    margin-top: 2px;
 }
 
 .disclaimer {
     margin: 0;
-    line-height: 1.5;
-    position: relative;
-    padding-left: 20px;
-}
-
-.disclaimer::before {
-    content: "ℹ️";
-    position: absolute;
-    left: 0;
-    top: 0;
+    padding: 4px 0; /* Increased padding */
+    line-height: 1.2; /* Slightly increased line height */
+    font-size: 0.8rem; /* Larger font size */
+    font-weight: 500; /* Slightly bolder */
+    letter-spacing: 0.2px; /* Better letter spacing for readability */
 }
 
 .crisis-resources {
@@ -550,38 +547,60 @@ button:disabled {
 }
 
 @media (max-width: 480px) {
-    .chat-container {
-        height: 95vh;
-        max-height: 95vh;
-        border-radius: 12px;
+    :host {
+        height: 100vh;
     }
     
-    .message {
-        max-width: 95%;
-        padding: 10px 14px;
+    .chat-container {
+        height: 70vh; /* Adjusted for mobile */
+        max-height: 100vh;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-header {
+        padding: 10px; /* Reduced padding */
+        min-height: 40px;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        max-height: calc(80vh); /* Calculate space for messages */
+        overflow-y: auto;
+    }
+    
+    .chat-input {
+        padding: 8px 10px;
+        min-height: 50px;
+        align-items: center; /* Center items vertically */
     }
     
     input {
-        padding: 12px 16px;
+        padding: 8px 12px;
         font-size: 14px;
+        height: 36px;
     }
     
     .send-button {
-        padding: 0 16px;
+        min-width: 50px;
+        height: 36px;
+        padding: 0 12px;
         font-size: 14px;
     }
     
-    .chat-footer {
-        padding: 8px 12px;
+
+    
+    .disclaimer {
         font-size: 0.75rem;
+        padding: 2px 0;
+        font-weight: 500;
     }
     
-    .rag-toggle {
-        font-size: 0.85rem;
-    }
-    
-    .clear-chat-btn {
-        padding: 6px 12px;
-        font-size: 13px;
+    /* Fix viewport height issues on mobile */
+    @supports (-webkit-touch-callout: none) {
+        .chat-container {
+            height: 70vh; /* Even further reduced for iOS */
+        }
     }
 }

@@ -148,7 +148,7 @@ export class ChatInterface extends LitElement {
       <div class="chat-input">
         <input 
             type="text" 
-            placeholder="Share your thoughts with me..."
+            placeholder="Share your thoughts..."
             .value=${this.inputMessage}
             @input=${this._handleInput}
             @keyup=${this._handleKeyUp}
@@ -159,8 +159,7 @@ export class ChatInterface extends LitElement {
       </div>
       
       <div class="chat-footer">
-        <p class="disclaimer">I'm here to support you, but I'm not a substitute for professional help. 
-        If you're experiencing a crisis, please reach out to a mental health professional.</p>
+        <p class="disclaimer">This is an AI LLM not a professional therapist. Kindly consult a professional for serious issues.</p>
       </div>
     </div>
   `;
@@ -248,7 +247,12 @@ export class ChatInterface extends LitElement {
     }
 
     async _apiCall(message) {
-        const res = await fetch("http://localhost:3001/chat", {
+        // Use window.location.hostname to make it work both locally and on other devices
+        const host = window.location.hostname;
+        const port = 3001;
+        const apiUrl = `http://${host}:${port}/chat`;
+        
+        const res = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
