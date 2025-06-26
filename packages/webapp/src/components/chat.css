@@ -259,13 +259,13 @@ body {
 }
 
 .user-message {
-    align-self: flex-start; /* Changed from flex-end to flex-start */
+    align-self: flex-end; /* Changed back to flex-end to align to the right */
     background-color: var(--user-bubble);
     color: #444;
     border-radius: 18px 18px 0 18px;
     border-bottom: 2px solid rgba(0,0,0,0.05);
-    /* Add visual differentiation since both are now left-aligned */
-    margin-left: 20px; /* Indent user messages slightly */
+    margin-left: 0; /* Remove left margin since we're aligning to the right */
+    margin-right: 20px; /* Add right margin instead */
 }
 
 .ai-message {
