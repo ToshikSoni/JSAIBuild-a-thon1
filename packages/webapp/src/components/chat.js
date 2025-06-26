@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { loadMessages, saveMessages, clearMessages } from '../utils/chatStore.js';
-import './chat.css'; // Import the CSS file
+import './chat.css';
 
 export class ChatInterface extends LitElement {
     static get properties() {
@@ -10,7 +10,8 @@ export class ChatInterface extends LitElement {
             isLoading: { type: Boolean },
             isRetrieving: { type: Boolean },
             ragEnabled: { type: Boolean },
-            chatMode: { type: String }
+            showCrisisResources: { type: Boolean },
+            crisisResources: { type: Array }
         };
     }
 
@@ -20,8 +21,15 @@ export class ChatInterface extends LitElement {
         this.inputMessage = '';
         this.isLoading = false;
         this.isRetrieving = false;
-        this.ragEnabled = true; // Enable by default
-        this.chatMode = "basic";
+        this.ragEnabled = true; // Enable RAG by default
+        this.showCrisisResources = false;
+        this.crisisResources = [];
+        this.sessionId = this._generateSessionId();
+    }
+
+    // Create a unique session ID for this conversation
+    _generateSessionId() {
+        return 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
     }
 
     // Render into light DOM so external CSS applies
@@ -33,12 +41,43 @@ export class ChatInterface extends LitElement {
         super.connectedCallback();
         // Load chat history from localStorage when component is added to the DOM
         this.messages = loadMessages();
+        
+        // Show welcome message if no history
+        if (this.messages.length === 0) {
+            this._addWelcomeMessage();
+        }
+        
+        // Add Google Font for Quicksand
+        this._addGoogleFont();
+    }
+    
+    _addGoogleFont() {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap';
+        document.head.appendChild(link);
+    }
+    
+    _addWelcomeMessage() {
+        const welcomeMessage = {
+            role: 'assistant',
+            content: "Hello there! I'm Vish, your friendly AI companion. I'm here to support you and provide a safe space for us to chat about whatever is on your mind. How are you feeling today? Remember, it's okay to not be okay, and I'm here to listen.",
+            isWelcome: true
+        };
+        this.messages = [welcomeMessage];
+        saveMessages(this.messages);
     }
 
     updated(changedProps) {
         // Save chat history to localStorage whenever messages change
         if (changedProps.has('messages')) {
             saveMessages(this.messages);
+            
+            // Scroll to the bottom of the chat
+            const chatMessages = this.querySelector('.chat-messages');
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         }
     }
 
@@ -46,31 +85,41 @@ export class ChatInterface extends LitElement {
         return html`
     <div class="chat-container">
       <div class="chat-header">
-        <button class="clear-cache-btn" @click=${this._clearCache}> 🧹Clear Chat</button>
-        <div class="mode-selector">
-            <label>Mode:</label>
-                <select @change=${this._handleModeChange}>
-                <option value="basic" ?selected=${this.chatMode === 'basic'}>Basic AI</option>
-                <option value="agent" ?selected=${this.chatMode === 'agent'}>Agent</option>
-                </select>
+        <h2 class="chat-title">Vish AI Friend</h2>
+        <div class="header-controls">
+          <label class="rag-toggle">
+            <input type="checkbox" ?checked=${this.ragEnabled} @change=${this._toggleRag}>
+            Use Supportive Resources
+          </label>
+          <button class="clear-chat-btn" @click=${this._clearChat}>Start Fresh Chat</button>
         </div>
-        <label class="rag-toggle ${this.chatMode === 'agent' ? 'disabled' : ''}">
-        <input type="checkbox" 
-            ?checked=${this.ragEnabled} 
-            @change=${this._toggleRag}
-            ?disabled=${this.chatMode === 'agent'}>
-        Use Employee Handbook
-        </label>
       </div>
+
       <div class="chat-messages">
+        ${this.showCrisisResources ? html`
+          <div class="crisis-resources">
+            <h3>Help is Always Available</h3>
+            <ul>
+              ${this.crisisResources.map(resource => html`
+                <li>
+                  <strong>${resource.name}:</strong> 
+                  ${resource.contact ? html`<span class="resource-contact">${resource.contact}</span>` : ''}
+                  ${resource.url ? html`<a href="${resource.url}" target="_blank" rel="noopener noreferrer">${resource.url}</a>` : ''}
+                </li>
+              `)}
+            </ul>
+            <p class="crisis-note">If you're feeling unsafe, please call emergency services (911 in the US) or reach out to someone you trust.</p>
+          </div>
+        ` : ''}
+        
         ${this.messages.map(message => html`
-          <div class="message ${message.role === 'user' ? 'user-message' : 'ai-message'}">
+          <div class="message ${message.role === 'user' ? 'user-message' : 'ai-message'} ${message.isWelcome ? 'welcome-message' : ''}">
             <div class="message-content">
-              <span class="message-sender">${message.role === 'user' ? 'You' : (this.chatMode === 'agent' ? 'Agent' : 'AI')}</span>
+              <span class="message-sender">${message.role === 'user' ? '👤 You' : '💚 Vish'}</span>
               <p>${message.content}</p>
               ${this.ragEnabled && message.sources && message.sources.length > 0 ? html`
                 <details class="sources">
-                  <summary>📚 Sources</summary>
+                  <summary>📚 Resources I'm Drawing From</summary>
                   <div class="sources-content">
                     ${message.sources.map(source => html`<p>${source}</p>`)}
                   </div>
@@ -79,33 +128,39 @@ export class ChatInterface extends LitElement {
             </div>
           </div>
         `)}
+        
         ${this.isRetrieving ? html`
           <div class="message system-message">
-            <p>📚 Searching employee handbook...</p>
+            <p>📚 Finding helpful resources for you...</p>
           </div>
         ` : ''}
+        
         ${this.isLoading && !this.isRetrieving ? html`
-          <div class="message ai-message">
+          <div class="message ai-message thinking">
             <div class="message-content">
-              <span class="message-sender">AI</span>
-              <p>Thinking...</p>
+              <span class="message-sender">Vish</span>
+              <p><span class="typing-indicator">Thinking<span>.</span><span>.</span><span>.</span></span></p>
             </div>
           </div>
         ` : ''}
       </div>
+
       <div class="chat-input">
         <input 
             type="text" 
-            placeholder=${this.chatMode === 'basic' ?
-                "Ask about company policies, benefits, etc..." :
-                "Ask Agent"}
+            placeholder="Share your thoughts with me..."
             .value=${this.inputMessage}
             @input=${this._handleInput}
             @keyup=${this._handleKeyUp}
         />
-        <button @click=${this._sendMessage} ?disabled=${this.isLoading || !this.inputMessage.trim()}>
+        <button class="send-button" @click=${this._sendMessage} ?disabled=${this.isLoading || !this.inputMessage.trim()}>
           Send
         </button>
+      </div>
+      
+      <div class="chat-footer">
+        <p class="disclaimer">I'm here to support you, but I'm not a substitute for professional help. 
+        If you're experiencing a crisis, please reach out to a mental health professional.</p>
       </div>
     </div>
   `;
@@ -115,10 +170,21 @@ export class ChatInterface extends LitElement {
         this.ragEnabled = e.target.checked;
     }
 
-    // Clear chat history from localStorage and UI
-    _clearCache() {
+    // Clear chat history and start fresh
+    _clearChat() {
         clearMessages();
         this.messages = [];
+        this._addWelcomeMessage();
+        this.showCrisisResources = false;
+        
+        // Clear the server-side memory as well
+        fetch("http://localhost:3001/clear-memory", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId: this.sessionId }),
+        }).catch(error => {
+            console.error('Failed to clear server memory:', error);
+        });
     }
 
     // Update inputMessage state as the user types
@@ -130,21 +196,6 @@ export class ChatInterface extends LitElement {
     _handleKeyUp(e) {
         if (e.key === 'Enter' && this.inputMessage.trim() && !this.isLoading) {
             this._sendMessage();
-        }
-    }
-
-    _handleModeChange(e) {
-        const newMode = e.target.value;
-        if (newMode !== this.chatMode) {
-            this.chatMode = newMode;
-
-            // Disable RAG when switching to agent mode
-            if (newMode === 'agent') {
-                this.ragEnabled = false;
-            }
-
-            clearMessages();
-            this.messages = [];
         }
     }
 
@@ -164,27 +215,38 @@ export class ChatInterface extends LitElement {
         this.isLoading = true;
 
         try {
-            // Simulate AI response (replace with real API call later)
+            // Call API for response
             const aiResponse = await this._apiCall(userQuery);
 
             // Add AI's response to the chat
             this.messages = [
                 ...this.messages,
-                { role: 'assistant', content: aiResponse.reply, sources: aiResponse.sources }
+                { 
+                    role: 'assistant', 
+                    content: aiResponse.reply, 
+                    sources: aiResponse.sources 
+                }
             ];
+            
+            // Show crisis resources if needed
+            if (aiResponse.isCrisis && aiResponse.resources) {
+                this.crisisResources = aiResponse.resources;
+                this.showCrisisResources = true;
+            }
         } catch (error) {
-            // Handle errors gracefully
             console.error('Error calling model:', error);
             this.messages = [
                 ...this.messages,
-                { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }
+                { 
+                    role: 'assistant', 
+                    content: "I'm sorry, I'm having trouble responding right now. If you're feeling in crisis, please call a crisis service like 988 (in the US) or your local emergency number."
+                }
             ];
         } finally {
             this.isLoading = false;
         }
     }
 
-    // Simulate an AI response (placeholder for future integration)
     async _apiCall(message) {
         const res = await fetch("http://localhost:3001/chat", {
             method: "POST",
@@ -192,7 +254,7 @@ export class ChatInterface extends LitElement {
             body: JSON.stringify({
                 message,
                 useRAG: this.ragEnabled,
-                mode: this.chatMode // Send the selected mode to the server
+                sessionId: this.sessionId
             }),
         });
         const data = await res.json();

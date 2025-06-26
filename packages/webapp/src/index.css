@@ -1,12 +1,16 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Quicksand', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color-scheme: light;
+  color: #213547;
+  background-color: #f0f5f9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -14,29 +18,101 @@
 }
 
 body {
+  font-family: 'Quicksand', sans-serif;
+  background-color: #f0f5f9;
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.app-container {
+/* Header and footer styles */
+header, footer {
   width: 100%;
-  max-width: 900px;
-  padding: 1rem;
   text-align: center;
+  padding: 1rem;
 }
 
-h1 {
+header {
+  background: linear-gradient(to right, #70b3a1, #8fc6b9);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+}
+
+header h1 {
   font-size: 2rem;
-  line-height: 1.1;
-  margin-bottom: 2rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.tagline {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+footer {
+  background: #f5f5f5;
+  color: #555;
+  padding: 1rem;
+  font-size: 0.8rem;
+  margin-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+footer p {
+  margin: 0.3rem 0;
+}
+
+/* Main content area */
+main {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  padding: 2rem 0;
+}
+
+/* Chat interface container - this is critical */
+chat-interface {
+  width: 60%;
+  /* Remove the absolute positioning that's causing problems */
+  position: static;
+  transform: none;
+  display: block;
+}
+
+@media (max-width: 1200px) {
+  chat-interface {
+    width: 80%;
+  }
+}
+
+@media (max-width: 768px) {
+  chat-interface {
+    width: 95%;
+  }
+  
+  header h1 {
+    font-size: 1.7rem;
+  }
+  
+  .tagline {
+    font-size: 0.9rem;
+  }
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #f0f5f9;
   }
 }

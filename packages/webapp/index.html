@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Chat Interface</title>
-    <script type="module" src="/src/main.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vish AI Friend - Supportive Mental Health Companion</title>
+    <link rel="stylesheet" href="./src/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="./src/components/chat.js"></script>
   </head>
   <body>
-    <div class="app-container">
-      <h1>AI Chat Interface</h1>
-      <chat-interface></chat-interface>
-    </div>
+    <header>
+        <div class="header-content">
+            <h1>Vish AI Friend</h1>
+            <p class="tagline">Your supportive companion through difficult times</p>
+        </div>
+    </header>
+    
+    <main>
+        <chat-interface></chat-interface>
+    </main>
+
+    <footer>
+        <p>Vish AI Friend is designed to provide support, not replace professional mental health services.</p>
+        <p>If you're in crisis, please call your local emergency number or a crisis hotline.</p>
+    </footer>
   </body>
 </html>
